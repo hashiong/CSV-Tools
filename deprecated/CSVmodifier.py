@@ -3,6 +3,10 @@ import os, re
 
 class CSVmodifieir:
 
+
+    # All csv files must have "first_name","last_name", "email", "phone", "alt_city", "alt_zip", "office_zip","country" columns
+
+
     def __init__(self, filename) -> None:
         self.filename = filename
         self.df = None  # Placeholder for the DataFrame

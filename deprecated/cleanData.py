@@ -85,7 +85,7 @@ def combine_csv_files(folder_path, common_cols, output_file):
 folder_path = 'data'  # Update this to your folder path
 
 # Define the common columns to include
-common_cols = ['#', 'Agent ID', 'First Name', 'Last Name', 'EMail', 
+common_cols = ['#', 'Agent ID', 'First Name', 'Last Name', 'Email', 
                 'Phone 1 Type', 'Phone 1', 'Phone 2 Type', 'Phone 2', 
                 'Phone 3 Type', 'Phone 3', 'Alt. Address', 'Alt. City', 
                 'Alt. Zip', 'Office ID', 'Office Name', 'Office Address', 
