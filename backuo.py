@@ -35,46 +35,37 @@ class CSVProcessor:
         input_df = CSVUtilities.load_csv(input_file)
         reference_df = CSVUtilities.load_csv(reference_file)
         # Validate the needed columns for matching
-        matches = []
         if (input_df is not None and reference_df is not None and 
             CSVProcessor.validate_csv(input_df, CSVProcessor.valid_data_cols) and 
             CSVProcessor.validate_csv(reference_df, CSVProcessor.valid_data_cols)):
 
             if "phone" in matching_cols:
                 # Remove 'phone' from matching_cols and handle separately
-                non_phone_cols = [col for col in reference_df.columns if col not in ["phone_1", "phone_2", "phone_3", "phone_1_type", "phone_2_type", "phone_3_type"]]
-                # phone_matches_input = pd.melt(input_df, id_vars=["first_name", "last_name"], value_vars=["phone_1", "phone_2", "phone_3"], var_name="phone_type", value_name="phone")
+                non_phone_cols = [col for col in matching_cols if col != "phone"]
+                
                 # Reshape reference_df to have one phone column
-                phone_matches_reference = pd.melt(reference_df, 
+                phone_matches_input = pd.melt(reference_df, 
                                             id_vars=non_phone_cols, 
                                             value_vars=["phone_1", "phone_2", "phone_3"], 
                                             var_name="phone_type", 
                                             value_name="phone")
-                print(phone_matches_reference)
-                phone_matches_reference = phone_matches_reference[~phone_matches_reference['phone'].isna()]
-                # Match based on phone
-                phone_matches_input = input_df[["first_name", "last_name", "phone"]].copy()
-                phone_matches_input.rename(columns={"phone": "phone_input"}, inplace=True)
-                phone_matches = pd.merge(phone_matches_reference, phone_matches_input, left_on=["first_name", "last_name", "phone"], right_on=["first_name", "last_name", "phone_input"], how="inner")
-                matches.append(phone_matches)
+            
+                print(phone_matches_input)
 
             # Match based on names
-            if "name" in matching_cols:
-                name_matches = pd.merge(reference_df, input_df, on=["first_name", "last_name"], how="inner")
-                matches.append(name_matches)
+            name_matches = pd.merge(reference_df, input_df, on=["first_name", "last_name"], how="inner")
+
+            # Match based on agent_id
+            agentid_matches = pd.merge(reference_df, input_df, on=["agent_id"], how="inner")
             
             # Match based on office id
-            if "office_name" in matching_cols:
-                office_name_matches = pd.merge(input_df, reference_df, on=["office_name"], how="inner")
-                matches.append(office_name_matches)
+            office_id_matches = pd.merge(input_df, reference_df, on=["office_id"], how="inner")
 
             # Match based on email
-            if "email" in matching_cols:
-                email_matches = pd.merge(input_df, reference_df, on=["email"], how="inner")
-                matches.append(email_matches)
+            email_matches = pd.merge(input_df, reference_df, on=["email"], how="inner")
 
             # Combine all matches
-            all_matches = pd.concat(matches).drop_duplicates()
+            # all_matches = pd.concat([name_matches, phone_matches, email_matches]).drop_duplicates()
 
             # Drop unnecessary or redundant columns
             all_matches = all_matches.drop(columns=[col for col in all_matches.columns if col.endswith('_x') or col.endswith('_y') or col.endswith('_ref')])
@@ -82,7 +73,7 @@ class CSVProcessor:
             # Drop any remaining duplicates
             all_matches = all_matches.loc[:, ~all_matches.columns.duplicated()]
 
-            # all_matches = all_matches.drop(columns="phone_type")
+            all_matches = all_matches.drop(columns="phone_type")
 
             # Capitalize column names
             all_matches = CSVProcessor.capitalize_columns(all_matches)
@@ -100,10 +91,10 @@ class CSVProcessor:
         return pd.DataFrame()
 
 # Assuming valid_data_cols and valid_reference_cols are defined as in your code
-input_file = r"C:/ReMax/CSV-Tools/agentdata/aggregate_data/cleaned_master_data.csv"
-reference_file = r"C:/ReMax/CSV-Tools/agentdata/reverse_prospect_data/reverse_prospect_agent_list.csv"
+input_file = r"C:/ReMax/CSV-Tools/agentdata/aggregate_data/cleaned_combined_data.csv"
+reference_file = r"C:/ReMax/CSV-Tools/agentdata/reverse_prospect_data/reverse_prospect_list.csv"
 
 valid_data_cols = ["first_name", "last_name", "email", "office_name", "phone"]
 
-matched_df = CSVProcessor.cross_match(reference_file,input_file, ["name"])
-matched_df.to_csv(r"C:\ReMax\CSV-Tools\agentdata\matched_data\matched_data.csv", index=False)
+matched_df = CSVProcessor.cross_match(reference_file,input_file, ["phone"])
+matched_df.to_csv("matched_data.csv", index=False)

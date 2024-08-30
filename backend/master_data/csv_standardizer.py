@@ -39,7 +39,7 @@ class CSVstandarizer:
         """
         df = CSVstandarizer.load_csv(file_path)
         if df is not None:
-            df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+            df.columns = df.columns.str.strip().str.lower().str.replace('.','').str.replace(' ', '_')
             if output_file_path:
                 save_path = output_file_path
             else:

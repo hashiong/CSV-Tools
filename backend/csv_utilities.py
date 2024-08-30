@@ -24,7 +24,7 @@ class CSVUtilities:
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
         return None
-    
+
     @staticmethod
     def find_duplicates(file_path, columns):
         """
@@ -43,7 +43,7 @@ class CSVUtilities:
             duplicates = df[df.duplicated(subset=columns, keep=False)]
             return duplicates
         return None
-    
+
     @staticmethod
     def remove_duplicates_keep_filled(file_path, output_file_path=None):
         """
@@ -80,9 +80,49 @@ class CSVUtilities:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    
+    @staticmethod
+    def strip_cells(df):
+        """
+        Strips leading and trailing spaces from all cells in the DataFrame.
 
+        Parameters:
+        df (pd.DataFrame): The DataFrame to process.
+        
+        Returns:
+        pd.DataFrame: DataFrame with stripped cells.
+        """
+        return df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     
+    @staticmethod
+    def convert_to_lowercase(df):
+        """
+        Converts all string values in the DataFrame to lowercase.
+
+        Parameters:
+        df (pd.DataFrame): The DataFrame to process.
+        
+        Returns:
+        pd.DataFrame: DataFrame with all string values converted to lowercase.
+        """
+        return df.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+    
+    @staticmethod
+    def convert_phone_numbers(df, phone_columns):
+        """
+        Converts phone numbers to pure digits in specified columns.
+
+        Parameters:
+        df (pd.DataFrame): The DataFrame to process.
+        phone_columns (list): List of columns containing phone numbers.
+        
+        Returns:
+        pd.DataFrame: DataFrame with phone numbers converted to pure digits.
+        """
+        for column in phone_columns:
+            if column in df.columns:
+                df[column] = df[column].astype(str).str.replace(r'\D', '', regex=True)
+        return df
+
     @staticmethod
     def save_csv(data_frame, file_path, index=False):
         """
@@ -106,18 +146,12 @@ class CSVUtilities:
 
 # Example usage
 if __name__ == "__main__":
-    file_path = "data\cleaned_combined_data.csv"  
-    columns_to_check = ['first_name', 'last_name'] 
+    file_path = r'C:\ReMax\CSV-Tools\agentdata\reverse_prospect_data\reverse_prospect_agent_list.csv'
+    output_file_path = r'C:\ReMax\CSV-Tools\agentdata\reverse_prospect_data\reverse_prospect_agent_list.csv'
     
-    # Find duplicates
-    duplicates_df = CSVUtilities.find_duplicates(file_path, columns_to_check)
-    
-    if duplicates_df is not None and not duplicates_df.empty:
-        print(f"Found {len(duplicates_df)} duplicate rows.")
-        duplicates_df = duplicates_df.sort_values(by=['first_name', 'last_name'])
-        #Optionally, save the duplicates to a new file
-        output_file_path = "data/duplicates.csv"  # Replace with desired output file path
-        CSVUtilities.save_csv(duplicates_df, output_file_path)
-    else:
-        print("No duplicates found.")
-
+    df = CSVUtilities.load_csv(file_path)
+    if df is not None:
+        df = CSVUtilities.strip_cells(df)
+        df = CSVUtilities.convert_to_lowercase(df)
+        df = CSVUtilities.convert_phone_numbers(df, phone_columns=['name']) # adjust column names as needed
+        CSVUtilities.save_csv(df, output_file_path)
