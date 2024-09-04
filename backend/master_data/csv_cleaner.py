@@ -33,8 +33,14 @@ class CSVCleaner:
                     # Clean column names
                     CSVstandarizer.clean_column_names(file_path)
 
+                    # Standarize phone numbers
+                    CSVstandarizer.convert_phone_numbers(file_path, "phone")
+
                     # Validate and clean CSV data
                     CSVstandarizer.validate_and_clean_csv(file_path)
+
+
+
                 except Exception as e:
                     logging.error(f"Error processing file {file_path}: {e}")
 
@@ -83,5 +89,5 @@ class CSVCleaner:
         else:
             logging.warning("No CSV files to combine.")
 
-CSVCleaner.process_all_csv_files_in_folder(r'C:\ReMax\CSV-Tools\agentdata\mls_data')
-CSVCleaner.combine_csv_files(r'C:\ReMax\CSV-Tools\agentdata\mls_data', r'C:\ReMax\CSV-Tools\agentdata\aggregate_data\cleaned_master_data.csv')
+CSVCleaner.process_all_csv_files_in_folder(r'backend\agentdata\new_data')
+CSVCleaner.combine_csv_files(r'backend\agentdata\new_data', r'backend\agentdata\new_data\new_added_data.csv')

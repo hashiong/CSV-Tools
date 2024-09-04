@@ -16,7 +16,7 @@ app = Flask(__name__)
 def cross_match_api():
     if request.method == 'POST':
         input_file = request.files['input_file']
-        reference_file = r"agentdata\aggregate_data\cleaned_combined_data.csv"
+        reference_file = r"backend/agentdata/aggregate_data/cleaned_master_data.csv"
         
         # Load the uploaded files into dataframes
         input_df = pd.read_csv(input_file)
@@ -25,7 +25,7 @@ def cross_match_api():
         valid_data_cols = ["first_name", "last_name", "email", "office_name", "phone"]
         
         # Perform cross-match
-        matched_df = CSVProcessor.cross_match(input_df, valid_data_cols, reference_df, valid_data_cols)
+        matched_df = CSVProcessor.cross_match(input_df, reference_df)
 
         # Check if matched_df is None or empty
         if matched_df is None or matched_df.empty:

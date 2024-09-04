@@ -45,6 +45,30 @@ class CSVstandarizer:
             else:
                 save_path = file_path
             CSVstandarizer.save_csv(df, save_path)
+    
+    @staticmethod
+    def convert_phone_numbers(file_path, phone_columns, output_file_path=None):
+        """
+        Converts phone numbers to pure digits in specified columns.
+
+        Parameters:
+        df (pd.DataFrame): The DataFrame to process.
+        phone_columns (list): List of columns containing phone numbers.
+        
+        Returns:
+        pd.DataFrame: DataFrame with phone numbers converted to pure digits.
+        """
+        df = CSVstandarizer.load_csv(file_path)
+        for column in phone_columns:
+            if column in df.columns:
+                df[column] = df[column].astype(str).str.replace(r'\D', '', regex=True)
+        
+        if output_file_path:
+            save_path = output_file_path
+        else:
+            save_path = file_path
+            
+        CSVstandarizer.save_csv(df, save_path)
 
     @staticmethod
     def validate_and_clean_csv(file_path, output_file_path=None):
