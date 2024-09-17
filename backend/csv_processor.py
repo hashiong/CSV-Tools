@@ -1,5 +1,5 @@
 import pandas as pd
-from csv_utilities import CSVUtilities
+from .csv_utilities import CSVUtilities
 
 class CSVProcessor:
 
@@ -32,13 +32,10 @@ class CSVProcessor:
         return df
 
     @staticmethod
-    def cross_match(input_file, reference_file, matching_cols):
+    def cross_match(input_df, reference_df, matching_cols):
         """Cross match the columns of each row of each df and return the list of matched columns from the reference dataframe."""
         
         try:
-            input_df = CSVUtilities.load_csv(input_file)
-            reference_df = CSVUtilities.load_csv(reference_file)
-
             # Validate the needed columns for matching
             if (input_df is not None and reference_df is not None and 
             CSVProcessor.validate_csv(input_df, CSVProcessor.valid_input_data_cols) and 
@@ -79,10 +76,10 @@ class CSVProcessor:
         return pd.DataFrame()
 
 
-input_file = r"backend\agentdata\reverse_prospect_data\reverse_prospect_agent_list.csv"
-reference_file = r"backend\agentdata\aggregate_data\master_data.csv"
+# input_file = r"backend\agentdata\reverse_prospect_data\reverse_prospect_agent_list.csv"
+# reference_file = r"backend\agentdata\aggregate_data\master_data.csv"
 
-valid_data_cols = ["first_name", "last_name", "email", "office_name", "phone"]
+# valid_data_cols = ["first_name", "last_name", "email", "office_name", "phone"]
 
-matched_df = CSVProcessor.cross_match(input_file, reference_file, ["office_name", "email"])
-matched_df.to_csv(r"backend\agentdata\matched_data\matched_data.csv", index=False)
+# matched_df = CSVProcessor.cross_match(input_file, reference_file, ["office_name", "email"])
+# matched_df.to_csv(r"backend\agentdata\matched_data\matched_data.csv", index=False)
