@@ -1,5 +1,5 @@
 import pandas as pd
-from .csv_utilities import CSVUtilities
+from csv_utilities import CSVUtilities
 
 class CSVProcessor:
 
@@ -37,10 +37,10 @@ class CSVProcessor:
         
         try:
             # Validate the needed columns for matching
+
             if (input_df is not None and reference_df is not None and 
-            CSVProcessor.validate_csv(input_df, CSVProcessor.valid_input_data_cols) and 
             CSVProcessor.validate_csv(reference_df, CSVProcessor.valid_ref_data_cols)):
-                
+            
                 non_phone_cols = [col for col in reference_df.columns if col not in ["phone_1", "phone_2", "phone_3", "phone_1_type", "phone_2_type", "phone_3_type"]]
 
                 melted_reference_df = pd.melt(reference_df, 
@@ -53,9 +53,11 @@ class CSVProcessor:
 
                 if "phone" in matching_cols:
                     reference_df = reference_df.dropna(subset=['phone'])
-
+                print("indf: ", input_df.columns)
+                print("input df: ", input_df[matching_cols])
                 input_df = input_df[matching_cols]
-
+                
+                
                 all_matches = pd.merge(reference_df, input_df, on=matching_cols, how="inner").drop_duplicates()
 
                 # Drop unnecessary or redundant columns
@@ -76,10 +78,13 @@ class CSVProcessor:
         return pd.DataFrame()
 
 
-# input_file = r"backend\agentdata\reverse_prospect_data\reverse_prospect_agent_list.csv"
-# reference_file = r"backend\agentdata\aggregate_data\master_data.csv"
-
+input_file = r"backend\agentdata\reverse_prospect_data\vicky_reverse.csv"
+reference_file = r"backend\agentdata\aggregate_data\master_data.csv"
+input_df = CSVUtilities.load_csv(input_file)
+ref_df = CSVUtilities.load_csv(reference_file)
 # valid_data_cols = ["first_name", "last_name", "email", "office_name", "phone"]
 
-# matched_df = CSVProcessor.cross_match(input_file, reference_file, ["office_name", "email"])
-# matched_df.to_csv(r"backend\agentdata\matched_data\matched_data.csv", index=False)
+matched_df = CSVProcessor.cross_match(input_df, ref_df, ["first_name", "last_name"])
+matched_df.to_csv(r"backend\agentdata\matched_data\matched_data1.csv", index=False)
+
+

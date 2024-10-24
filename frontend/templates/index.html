@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Processing Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Upload CSV File</h1>
+    <form action="/" method="POST" enctype="multipart/form-data">
+        <label for="input_file">Input CSV:</label>
+        <input type="file" name="input_file" accept=".csv" required><br><br>
+        
+        <!-- Removed the Master CSV upload field, as it's hardcoded now -->
+
+        <button type="submit">Process</button>
+    </form>
+</body>
+</html>

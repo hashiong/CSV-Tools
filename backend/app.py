@@ -1,74 +1,63 @@
-from flask import Flask, request, jsonify, send_file
-import pandas as pd
-import sys
 import os
-from io import BytesIO
+from flask import Flask, render_template, request, send_file
+from utils.processing import load_and_preprocess_data, melt_master_dataframe, find_missing_rows, count_matching_names
+from utils.input_utils.input_processor import check_columns, clean_phone_numbers
+import pandas as pd
 
-# Add the project root directory to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+app = Flask(__name__, template_folder="../frontend/templates", static_folder="../frontend/static")
 
-from backend.csv_processor import CSVProcessor  # Import CSVProcessor from the backend package
+UPLOAD_FOLDER = 'data/upload'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MASTER_FILE_PATH = os.path.join(BASE_DIR, 'data', 'brokermetrics_data', 'Master', '10232024.csv')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-app = Flask(__name__)
-
-@app.route('/api/cross-match', methods=['POST'])
-def cross_match_api():
-    try:
-        # Ensure input file is provided
-        if 'input_file' not in request.files:
-            return jsonify({"error": "No input file provided."}), 400
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        input_file = request.files["input_file"]
         
-        input_file = request.files['input_file']
+        # Save uploaded file
+        input_file_path = os.path.join(UPLOAD_FOLDER, input_file.filename)
+        input_file.save(input_file_path)
 
-        # Ensure matching columns are provided in the form data
-        matching_cols = request.form.getlist('matching_cols')
-        if not matching_cols:
-            return jsonify({"error": "No matching columns specified."}), 400
-        
-        # Check if "name" is in matching_cols and replace it with ["first_name", "last_name"]
-        if "name" in matching_cols:
-            matching_cols.remove("name")
-            matching_cols.extend(["first_name", "last_name"])
+        # Load and preprocess the uploaded input and master CSV files
+        input_df, master_df = load_and_preprocess_data(input_file_path, MASTER_FILE_PATH)
+        if(check_columns(input_df, ["First Name", "Last Name", "Phone"])):
+            clean_phone_numbers(input_df, ["Phone"])
+        else:
+            print("cols dont match")
 
-        # Path to the reference file
-        reference_file = os.path.join(os.path.dirname(__file__), 'agentdata', 'aggregate_data', 'master_data.csv')
+        # Melt the master DataFrame to handle multiple phone numbers
+        melted_master_df = melt_master_dataframe(master_df)
 
-        # Load input file into DataFrame using BytesIO
-        input_df = pd.read_csv(BytesIO(input_file.read()))
-        reference_df = pd.read_csv(reference_file)
-        
-        # Validate if necessary columns are present
-        if input_df.empty or reference_df.empty:
-            return jsonify({"error": "One or both files are empty."}), 400
+        # Find missing agents
+        missing_agents = find_missing_rows(melted_master_df, input_df, ['First Name', 'Last Name'])
+        missing_agents = missing_agents[missing_agents['Phone'].isnull()]
+        missing_agents.to_csv("missing.csv")
 
-        # Ensure columns for matching exist in both DataFrames
-        missing_cols = [col for col in matching_cols if col not in input_df.columns or col not in reference_df.columns]
-        if missing_cols:
-            return jsonify({"error": f"Missing columns: {', '.join(missing_cols)}"}), 400
+        # Merge the data based on 'First Name' and 'Last Name'
+        merged_df = pd.merge(input_df, melted_master_df, on=['First Name', 'Last Name'], how='left', suffixes=('', '_data'))
+        merged_df['Phone'] = merged_df['Phone'].fillna(merged_df['Phone_data'])
+        merged_df.drop(columns=['Phone_data'], inplace=True)
+        merged_df = merged_df[merged_df['Phone'].notna()]
+        cleaned_df = merged_df.drop_duplicates(subset=['First Name', 'Last Name', "Phone"])
 
-        # Perform cross-match using the CSVProcessor class, passing the columns for matching
-        matched_df = CSVProcessor.cross_match(input_df, reference_df, matching_cols)
+        unique_agents = merged_df.drop_duplicates(subset=['First Name', 'Last Name'])
+        unique_agents.to_csv("unique_agents.csv", index=False)
 
-        # Check if any matches were found
-        if matched_df.empty:
-            return jsonify({"message": "No matches found."}), 200
+        print(f'Total rows in input: {len(input_df)}')
+        print(f'Match Rate: {len(unique_agents) / len(input_df) * 100:.2f}%')
+        print(f'Total agents matched and found phone numbers: {len(unique_agents)}')
+        print(f'Total Phone Numbers Found: {len(cleaned_df)}')
 
-        # Generate the CSV content in memory using BytesIO
-        csv_output = BytesIO()
-        matched_df.to_csv(csv_output, index=False)
-        csv_output.seek(0)  # Go to the start of the BytesIO object
+        # Save the merged output to a CSV file
+        output_file_path = os.path.join(UPLOAD_FOLDER, "matched_result.csv")
+        cleaned_df.to_csv(output_file_path, index=False)
 
-        # Return the CSV file as a response for download
-        return send_file(
-            csv_output,
-            mimetype="text/csv",
-            as_attachment=True,
-            download_name="matched_data.csv"  # For Flask versions >= 2.0
-        )
+        # Return the file as a download
+        return send_file(output_file_path, as_attachment=True)
 
-    except Exception as e:
-        # Catch any unexpected errors and return an appropriate response
-        return jsonify({"error": str(e)}), 500
+    return render_template("index.html")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
