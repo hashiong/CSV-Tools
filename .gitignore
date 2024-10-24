@@ -1,2 +1,6 @@
 .vscode/
 *.code-workspace
+backend\data\brokermetrics_data\Aggregated
+backend\data\brokermetrics_data\LA
+backend\data\brokermetrics_data\Orange County
+backend\data\brokermetrics_data\San Bernadino
