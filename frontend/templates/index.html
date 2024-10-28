@@ -13,7 +13,7 @@
         <!-- Description of input requirements -->
         <p class="description">Please upload a CSV file containing the following columns: <strong>First Name</strong>, <strong>Last Name</strong>, <strong>Email</strong>, and <strong>Phone</strong>. The <strong>First Name</strong> and <strong>Last Name</strong> fields are mandatory, and both must match case exactly (case-sensitive).</p>
         
-        <form action="/" method="POST" enctype="multipart/form-data" class="form">
+        <form action="/crossmatch" method="POST" enctype="multipart/form-data" class="form">
             <div class="input-group">
                 <label for="input_file">Input CSV:</label>
                 <input type="file" name="input_file" accept=".csv" required>
