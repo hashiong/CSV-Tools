@@ -3,8 +3,10 @@ from flask import Flask, render_template, request, send_file
 from utils.processing import load_and_preprocess_data, melt_master_dataframe, find_missing_rows, count_matching_names
 from utils.input_utils.input_processor import check_columns, clean_phone_numbers
 from utils.clean_for_texting import clean_csv_for_texting
+from utils.input_utils.reversed_prospect_input import process_csv
+
 import pandas as pd
-import re, logging
+import logging
 
 
 app = Flask(__name__, template_folder="../frontend/templates", static_folder="../frontend/static")
@@ -108,6 +110,35 @@ def clean_csv_for_texting_route():
 
     return render_template("clean_texting.html")
 
+
+@app.route("/clean_input", methods=["GET", "POST"])
+def split_columns_route():
+    if request.method == "POST":
+        input_file = request.files.get("input_file")
+        if not input_file:
+            return "No file uploaded", 400
+
+        # Save the input file
+        input_file_path = os.path.join(UPLOAD_FOLDER, input_file.filename)
+        input_file.save(input_file_path)
+        logging.info(f"Input file saved at: {input_file_path}")
+
+        output_file_path = os.path.join(UPLOAD_FOLDER, "cleaned_input.csv")
+
+        try:
+            # Load and process the CSV
+            df = process_csv(input_file_path)
+            # Save the processed file
+            df.to_csv(output_file_path, index=False)
+            logging.info("CSV processed and saved successfully!")
+
+            return send_file(output_file_path, as_attachment=True)
+
+        except Exception as e:
+            logging.error(f"An error occurred while processing the file: {e}")
+            return "An error occurred while processing the file", 500
+
+    return render_template("clean_input.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

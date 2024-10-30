@@ -45,4 +45,3 @@ def clean_csv_for_texting(file_path):
     
     return new_df
 
-    
