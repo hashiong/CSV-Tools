@@ -36,9 +36,11 @@ def split_member_info(row):
     return pd.Series([email, office_name, phone])
 
 def split_name(full_name):
-    # Split the full name by space
+    # Split the full name by spaces
     name_parts = full_name.split()
-    # First name is the first part, last name is the remaining part joined together
-    first_name = name_parts[0]
-    last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+    
+    # Use the last part as the last name, and the rest as the first name
+    last_name = name_parts[-1] if len(name_parts) > 0 else ""
+    first_name = " ".join(name_parts[:-1]) if len(name_parts) > 1 else ""
+    
     return pd.Series([first_name, last_name])

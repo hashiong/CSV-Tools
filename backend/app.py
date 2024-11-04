@@ -141,4 +141,4 @@ def split_columns_route():
     return render_template("clean_input.html")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", ssl_context='adhoc', port=5000, debug=True)

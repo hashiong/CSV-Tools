@@ -10,6 +10,21 @@
     <div class="container">
         <h1>CSV Cleaner for Texting</h1>
         
+        <div class="instructions">
+            <h2>Instructions</h2>
+            <p>Please ensure your CSV file contains the following columns:</p>
+            <ul>
+                <li><strong>First Name</strong></li>
+                <li><strong>Last Name</strong></li>
+                <li><strong>Office Name</strong></li>
+                <li><strong>EMail</strong></li>
+                <li><strong>Phone 1</strong></li>
+                <li><strong>Phone 2</strong></li>
+                <li><strong>Phone 3</strong></li>
+            </ul>
+            <p>These columns are required for the CSV cleaning process to work correctly.</p>
+        </div>
+
         <form action="/clean_texting" method="POST" enctype="multipart/form-data" class="form">
             <div class="input-group">
                 <label for="input_file">Input CSV:</label>
