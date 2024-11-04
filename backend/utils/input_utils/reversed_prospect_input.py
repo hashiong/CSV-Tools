@@ -6,9 +6,9 @@ def process_csv(file_path):
     df = pd.read_csv(file_path)
     
     # Check and process 'Member Email Office Name Member Direct Phone' column
-    if 'Member Email Office Name Member Direct Phone' in df.columns:
-        df[['EMail', 'Office Name', 'Phone']] = df['Member Email Office Name Member Direct Phone'].apply(split_member_info)
-        df.drop(columns=['Member Email Office Name Member Direct Phone'], inplace=True)
+    if 'Messdata' in df.columns:
+        df[['EMail', 'Office Name', 'Phone']] = df['Messdata'].apply(split_member_info)
+        df.drop(columns=['Messdata'], inplace=True)
 
     # Check and process 'Agent' column
     if 'Agent' in df.columns:
