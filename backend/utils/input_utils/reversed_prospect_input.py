@@ -4,16 +4,22 @@ import re
 def process_csv(file_path):
     # Load the CSV file
     df = pd.read_csv(file_path)
-    
+
     # Check and process 'Member Email Office Name Member Direct Phone' column
     if 'Messdata' in df.columns:
-        df[['EMail', 'Office Name', 'Phone']] = df['Messdata'].apply(split_member_info)
+        if df['Messdata'].notna().any():  # Check if 'Messdata' has any non-NaN values
+            df['Messdata'] = df['Messdata'].astype(str)
+            df[['EMail', 'Office Name', 'Phone']] = df['Messdata'].apply(split_member_info)
+        else:  # If 'Messdata' is empty
+            df[['EMail', 'Office Name', 'Phone']] = ''
         df.drop(columns=['Messdata'], inplace=True)
 
     # Check and process 'Agent' column
     if 'Agent' in df.columns:
         df[['First Name', 'Last Name']] = df['Agent'].apply(split_name)
         df.drop(columns=['Agent'], inplace=True)
+    
+    print(df)
     
     # Keep only the specified columns
     columns_to_keep = ['EMail', 'Office Name', 'Phone', 'First Name', 'Last Name']
@@ -44,3 +50,7 @@ def split_name(full_name):
     first_name = " ".join(name_parts[:-1]) if len(name_parts) > 1 else ""
     
     return pd.Series([first_name, last_name])
+
+
+df = process_csv(r"backend\data\upload\Reverse Prospect Service_ 1457 Montezuma_ Gloria Xiao.csv")
+df.to_csv("test_output.csv")
