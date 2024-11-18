@@ -13,7 +13,7 @@ app = Flask(__name__, template_folder="../frontend/templates", static_folder="..
 
 UPLOAD_FOLDER = 'data/upload'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MASTER_FILE_PATH = os.path.join(BASE_DIR, 'data', 'brokermetrics_data', 'Master', '10232024.csv')
+MASTER_FILE_PATH = os.path.join(BASE_DIR, 'data', 'brokermetrics_data', 'Master', '11132024.csv')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route("/crossmatch", methods=["GET", "POST"])
