@@ -51,6 +51,3 @@ def split_name(full_name):
     
     return pd.Series([first_name, last_name])
 
-
-df = process_csv(r"backend\data\upload\Reverse Prospect Service_ 1457 Montezuma_ Gloria Xiao.csv")
-df.to_csv("test_output.csv")
